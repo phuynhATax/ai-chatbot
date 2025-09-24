@@ -10,7 +10,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   pgadmin:
     image: dpage/pgadmin4
@@ -21,6 +22,8 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "8080:80"
+    volumes:
+      - ./pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
 
@@ -38,7 +41,7 @@ services:
   chatbot:
     build: ./chatbot
     container_name: chatbot_node
-    restart: no
+    restart: always
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       DATABASE_URL: postgres://admin:admin@postgres:5432/chatbotdb
@@ -47,7 +50,17 @@ services:
     depends_on:
       - postgres
 
+  chatbot_ui:
+    build: ./chatbot-ui
+    container_name: chatbot_ui
+    environment:
+      - REACT_APP_API_URL=http://chatbot:3000/chat
+    ports:
+      - "3001:80"
+    depends_on:
+      - chatbot
 
 volumes:
   postgres_data:
+  pgadmin_data:
   n8n_data:

@@ -1,12 +1,22 @@
-FROM node:20
+# chatbot/Dockerfile
 
+# Use official Node.js LTS image
+FROM node:20-alpine
+
+# Set working directory inside container
 WORKDIR /app
 
+# Copy package.json & package-lock.json first (for better caching)
 COPY package*.json ./
-RUN npm install
 
+# Install only production dependencies
+RUN npm install --production
+
+# Copy rest of the application code
 COPY . .
 
+# Expose port
 EXPOSE 3000
 
-CMD ["node", "index.js"]
+# Start the app
+CMD ["npm", "start"]
